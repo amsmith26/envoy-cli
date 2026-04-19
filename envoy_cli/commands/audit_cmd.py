@@ -16,7 +16,8 @@ def audit() -> None:
 @audit.command("log")
 @click.option("--env-file", default=".env", show_default=True, help="Path to .env file.")
 @click.option("--profile", default=None, help="Filter by profile name.")
-def cmd_show_log(env_file: str, profile: str | None) -> None:
+@click.option("--limit", default=None, type=int, help="Limit number of entries shown.")
+def cmd_show_log(env_file: str, profile: str | None, limit: int | None) -> None:
     """Show audit log entries for the vault."""
     vault = _vault_path(env_file)
     entries = get_log(vault)
@@ -28,6 +29,8 @@ def cmd_show_log(env_file: str, profile: str | None) -> None:
         if not entries:
             click.echo(f"No entries for profile '{profile}'.")
             return
+    if limit is not None:
+        entries = entries[-limit:]
     for e in entries:
         detail = f" ({e['details']}" + ")" if e["details"] else ""
         click.echo(f"[{e['timestamp']}] {e['action']:10s} profile={e['profile']}{detail}")
