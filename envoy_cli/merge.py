@@ -28,12 +28,18 @@ def merge_profiles(
 
     Returns:
         A dict with 'added' and 'updated' key lists.
+
+    Raises:
+        MergeError: If any source profile is not found in the vault.
+        MergeError: If a source profile and the target profile are the same.
     """
     vault = load_vault(vault_path, password)
 
     for source in sources:
         if source not in vault:
             raise MergeError(f"Source profile '{source}' not found in vault.")
+        if source == target:
+            raise MergeError(f"Source and target profile cannot be the same: '{source}'.")
 
     if target not in vault:
         vault[target] = {}
