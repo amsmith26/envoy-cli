@@ -1,10 +1,20 @@
-from envoy_cli.commands.sync_cmd import sync
-from envoy_cli.commands.encrypt_cmd import cmd_encrypt, cmd_decrypt
-from envoy_cli.commands.profile_cmd import profile
-from envoy_cli.commands.diff_cmd import diff
-from envoy_cli.commands.audit_cmd import audit
-from envoy_cli.commands.export_cmd import export
-from envoy_cli.commands.rotate_cmd import rotate
-from envoy_cli.commands.import_cmd import cmd_import_profile
-from envoy_cli.commands.template_cmd import template
-from envoy_cli.commands.lint_cmd import lint
+"""Shared decorators and utilities for envoy-cli commands."""
+
+import click
+
+
+def vault_options(func):
+    """Decorator that adds --vault and --password options to a command."""
+    func = click.option(
+        "--vault",
+        default=".env.vault",
+        show_default=True,
+        help="Path to the vault file.",
+    )(func)
+    func = click.option(
+        "--password",
+        prompt=True,
+        hide_input=True,
+        help="Vault password.",
+    )(func)
+    return func
