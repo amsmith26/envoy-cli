@@ -2,6 +2,7 @@
 
 import getpass
 import sys
+from typing import Optional
 
 from envoy_cli.file_handler import read_env_file
 from envoy_cli.parser import parse_env_file
@@ -10,14 +11,21 @@ from envoy_cli.file_handler import write_env_file
 from envoy_cli.parser import serialize_env
 
 
+def _prompt_password(confirm: bool = False) -> str:
+    """Prompt the user for a password, optionally asking for confirmation."""
+    password = getpass.getpass("Encryption password: " if confirm else "Decryption password: ")
+    if confirm:
+        confirmation = getpass.getpass("Confirm password: ")
+        if password != confirmation:
+            print("Passwords do not match.", file=sys.stderr)
+            sys.exit(1)
+    return password
+
+
 def cmd_encrypt(env_path: str, password: Optional[str] = None) -> None:
     """Read a plain .env file and write an encrypted vault."""
     if password is None:
-        password = getpass.getpass("Encryption password: ")
-        confirm = getpass.getpass("Confirm password: ")
-        if password != confirm:
-            print("Passwords do not match.", file=sys.stderr)
-            sys.exit(1)
+        password = _prompt_password(confirm=True)
 
     raw = read_env_file(env_path)
     env = parse_env_file(raw)
@@ -32,7 +40,7 @@ def cmd_decrypt(env_path: str, output_path: str, password: Optional[str] = None)
         sys.exit(1)
 
     if password is None:
-        password = getpass.getpass("Decryption password: ")
+        password = _prompt_password(confirm=False)
 
     try:
         env = load_vault(env_path, password)
@@ -42,6 +50,3 @@ def cmd_decrypt(env_path: str, output_path: str, password: Optional[str] = None)
 
     write_env_file(output_path, serialize_env(env))
     print(f"Decrypted env written to {output_path}")
-
-
-from typing import Optional  # noqa: E402 (keep import at module level in real code)
