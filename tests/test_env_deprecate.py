@@ -91,5 +91,13 @@ def test_check_deprecated_usage_no_violations(vault_file):
 
 
 def test_deprecate_key_no_replacement(vault_file):
-    record = deprecate_key(vault_file, PASSWORD, "dev", "PORT", reason="unused")
-    assert record["replacement"] is None
+    record = deprecate_key(vault_file, PASSWORD, "dev", "OLD_API_KEY", reason="No longer used")
+    assert record["reason"] == "No longer used"
+    assert record.get("replacement") is None
+
+
+def test_deprecate_key_already_deprecated(vault_file):
+    """Deprecating a key that is already deprecated should raise DeprecateError."""
+    deprecate_key(vault_file, PASSWORD, "dev", "OLD_API_KEY", reason="first")
+    with pytest.raises(DeprecateError, match="already deprecated"):
+        deprecate_key(vault_file, PASSWORD, "dev", "OLD_API_KEY", reason="second")
