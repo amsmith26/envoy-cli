@@ -32,6 +32,9 @@ envoy pull --env staging
 
 # List all tracked environments
 envoy list
+
+# Compare local .env with a remote environment
+envoy diff --env production
 ```
 
 Secrets are encrypted before being synced and never stored in plain text.
