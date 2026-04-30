@@ -58,3 +58,17 @@ def check_required(vault_path: str, password: str, profile: str) -> List[str]:
     required_keys = store.get("keys", [])
     env = vault.get("profiles", {}).get(profile, {})
     return [k for k in required_keys if not env.get(k, "").strip()]
+
+
+def assert_required(vault_path: str, password: str, profile: str) -> None:
+    """Raise RequiredError if any required keys are missing or empty in the profile.
+
+    This is a convenience wrapper around check_required intended for use in
+    activation flows where a hard failure is desired instead of a return value.
+    """
+    missing = check_required(vault_path, password, profile)
+    if missing:
+        keys_str = ", ".join(missing)
+        raise RequiredError(
+            f"Profile '{profile}' is missing required key(s): {keys_str}"
+        )
