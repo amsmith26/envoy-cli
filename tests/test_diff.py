@@ -64,3 +64,14 @@ def test_format_diff_changed_prefix():
 def test_format_diff_empty():
     result = diff_envs(BASE, BASE)
     assert format_diff(result) == []
+
+
+def test_format_diff_contains_key_and_values():
+    """Ensure formatted lines include the key name and both old/new values."""
+    result = diff_envs({"K": "old"}, {"K": "new"})
+    lines = format_diff(result)
+    changed_lines = [line for line in lines if line.startswith("~")]
+    assert len(changed_lines) == 1
+    assert "K" in changed_lines[0]
+    assert "old" in changed_lines[0]
+    assert "new" in changed_lines[0]
